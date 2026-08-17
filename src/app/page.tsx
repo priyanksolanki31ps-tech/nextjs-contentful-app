@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getBlogPosts } from '@/lib/contentful';
+import { getBlogPosts, getHeroData } from '@/lib/contentful';
+import HeroPost from '@/components/HeroPost';
+import Hero from '@/components/Hero';
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -12,6 +14,7 @@ export default async function HomePage() {
     console.error('Error loading blog posts:', error);
   }
 
+  const heroData = await getHeroData();
   // If there are no posts
   if (!posts || posts.length === 0) {
     return (
@@ -49,10 +52,6 @@ export default async function HomePage() {
     return url.startsWith('//') ? `https:${url}` : url;
   };
 
-  const featuredImage = getImageUrl(featuredPost.fields.featuredImage);
-  const featuredAuthor = featuredPost.fields.author?.fields?.name || 'Anonymous';
-  const featuredAuthorAvatar = getImageUrl(featuredPost.fields.author?.fields?.avatar);
-
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-indigo-500 selection:text-white">
       {/* Header */}
@@ -74,69 +73,19 @@ export default async function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12 md:py-20">
-        {/* Hero Section / Featured Post */}
-        <section className="mb-20">
-          <div className="relative group overflow-hidden rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 backdrop-blur-sm grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 p-6 md:p-8 hover:shadow-2xl hover:shadow-indigo-500/5 transition-all duration-500">
-            {/* Background Accent */}
-            <div className="absolute -inset-px bg-gradient-to-tr from-indigo-500/10 to-purple-500/0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            
-            {featuredImage && (
-              <div className="relative h-72 md:h-96 lg:h-[400px] rounded-2xl overflow-hidden shadow-md">
-                <Image
-                  src={featuredImage}
-                  alt={featuredPost.fields.title}
-                  fill
-                  priority
-                  className="object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-              </div>
-            )}
-
-            <div className="flex flex-col justify-center relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
-                  Featured
-                </span>
-                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                  {formatDate(featuredPost.fields.publishedDate)}
-                </span>
-              </div>
-
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
-                <Link href={`/posts/${featuredPost.fields.slug}`}>
-                  {featuredPost.fields.title}
-                </Link>
-              </h2>
-
-              <p className="text-zinc-600 dark:text-zinc-300 text-lg leading-relaxed mb-8">
-                {featuredPost.fields.shortDescription}
-              </p>
-
-              <div className="mt-auto pt-6 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  {featuredAuthorAvatar ? (
-                    <div className="relative h-10 w-10 rounded-full overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                      <Image src={featuredAuthorAvatar} alt={featuredAuthor} fill className="object-cover" />
-                    </div>
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                      {featuredAuthor[0]}
-                    </div>
-                  )}
-                  <span className="font-semibold text-sm text-zinc-700 dark:text-zinc-200">{featuredAuthor}</span>
-                </div>
-                
-                <Link
-                  href={`/posts/${featuredPost.fields.slug}`}
-                  className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform duration-300"
-                >
-                  Read Post 
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
-                </Link>
-              </div>
-            </div>
+        {heroData ? (
+          <Hero
+            heading={heroData.heading}
+            description={heroData.description}
+            imageUrl={heroData.imageUrl}
+          />
+        ) : (
+          <div className="p-12 text-center border rounded-xl border-dashed">
+            <p className="text-zinc-500">Please create and publish a "Hero" entry in Contentful first.</p>
           </div>
-        </section>
+        )}
+        {/* Hero Section / Featured Post */}
+        <HeroPost post={featuredPost} />
 
         {/* Recent Posts Section */}
         {recentPosts.length > 0 && (
@@ -164,7 +113,7 @@ export default async function HomePage() {
                       <span className="text-xs text-zinc-500 dark:text-zinc-400 font-semibold mb-3">
                         {formatDate(post.fields.publishedDate)}
                       </span>
-                      <h4 className="text-xl font-bold mb-3 tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
+                      <h4 className="text-xl font-bold mb-3 tracking-tight group-hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">
                         <Link href={`/posts/${post.fields.slug}`}>{post.fields.title}</Link>
                       </h4>
                       <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-6 flex-1">
