@@ -11,7 +11,7 @@ const BRAND_THEMES: Record<string, { name: string; accent: string; accentText: s
     accentText: 'bg-red-600 hover:bg-red-700 shadow-red-600/20',
     headerAccent: 'from-red-600 to-red-400',
   },
-  benz: {
+  'mercedes-benz': {
     name: 'Mercedes-Benz',
     accent: 'bg-zinc-800/10 text-zinc-800 dark:bg-zinc-800/20 dark:text-zinc-200',
     accentText: 'bg-zinc-950 hover:bg-black dark:bg-zinc-800 dark:hover:bg-zinc-700 shadow-zinc-950/20',
