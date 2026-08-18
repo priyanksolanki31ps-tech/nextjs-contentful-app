@@ -12,23 +12,6 @@ export const contentfulClient = createClient({
   accessToken: accessToken || '',
 });
 
-export async function getBlogPosts() {
-  const entries = await contentfulClient.getEntries({
-    content_type: 'pageBlogPost',
-    order: ['-fields.publishedDate'] as any,
-  });
-  return entries.items;
-}
-
-export async function getBlogPostBySlug(slug: string) {
-  const entries = await contentfulClient.getEntries({
-    content_type: 'pageBlogPost',
-    'fields.slug': slug,
-    limit: 1,
-  });
-  return entries.items[0] || null;
-}
-
 export async function getHeroData(siteId: string = 'ferrari') {
   try {
     const entries = await contentfulClient.getEntries({
