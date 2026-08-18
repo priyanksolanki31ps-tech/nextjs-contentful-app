@@ -16,7 +16,8 @@ export async function getHeroData(siteId: string = 'ferrari') {
   try {
     const entries = await contentfulClient.getEntries({
       content_type: 'hero',
-      'fields.brand.fields.slug': siteId, // Query using the slug of the referenced Brand
+      'fields.brand.sys.contentType.sys.id': 'brand', // Required by Contentful when querying fields on references
+      'fields.brand.fields.slug': siteId,
       limit: 1,
     });
 
