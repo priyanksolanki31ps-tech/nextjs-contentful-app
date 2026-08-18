@@ -29,20 +29,28 @@ export async function getBlogPostBySlug(slug: string) {
   return entries.items[0] || null;
 }
 
-export async function getHeroData() {
-  const entries = await contentfulClient.getEntries({
-    content_type: 'hero', // This is the Content Type ID you created in Step 1
-    limit: 1,
-  });
-  if (!entries.items.length) return null;
-  const item = entries.items[0];
-  const fields = item.fields as any;
-  // Extract and format the fields safely
-  const imageFile = fields.image?.fields?.file;
-  const imageUrl = imageFile?.url ? `https:${imageFile.url}` : null;
-  return {
-    heading: fields.heading || '',
-    description: fields.description || '',
-    imageUrl,
-  };
+export async function getHeroData(siteId: string = 'ferrari') {
+  try {
+    const entries = await contentfulClient.getEntries({
+      content_type: 'hero',
+      'fields.brand.fields.slug': siteId, // Query using the slug of the referenced Brand
+      limit: 1,
+    });
+
+    if (!entries.items.length) return null;
+
+    const item = entries.items[0];
+    const fields = item.fields as any;
+    const imageFile = fields.image?.fields?.file;
+    const imageUrl = imageFile?.url ? `https:${imageFile.url}` : null;
+
+    return {
+      heading: fields.heading || '',
+      description: fields.description || '',
+      imageUrl,
+    };
+  } catch (error) {
+    console.error(`Error loading hero data for site ${siteId}:`, error);
+    return null;
+  }
 }
